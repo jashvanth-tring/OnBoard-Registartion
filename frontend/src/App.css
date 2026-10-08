@@ -1,0 +1,76 @@
+body {
+  font-family:'Times New Roman', Times, serif;
+  background-color: #002368;
+  margin: 0;
+}
+
+/* white box in the center of the page */
+.container {
+  max-width: 600px;
+  margin: 30px auto;
+  background-color: rgb(255, 255, 255);
+  padding: 25px;
+  border-radius: 8px;
+}
+
+h1 {
+  text-align: center;
+  color: rgb(12, 221, 68);
+}
+
+/* the three step names in a row */
+.progress {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  color: gray;
+  font-size: 14px;
+}
+
+/* the current step is blue and bold */
+.progress .active {
+  color: rgb(0, 93, 254);
+  font-weight: bold;
+}
+
+/* each label + input stacked vertically with space below */
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+input, select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* error messages in red */
+.error {
+  color: red;
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+/* buttons on the right side */
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: blue;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
