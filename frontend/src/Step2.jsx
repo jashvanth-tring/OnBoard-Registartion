@@ -1,10 +1,7 @@
 function Step2({ formData, errors, handleChange, handleFile, handleCollegeFile }) {
-  // Build the college marksheet boxes with a loop.
-  // If the dropdown says 3, the loop runs 3 times and we get 3 boxes.
   const marksheetBoxes = [];
   for (let i = 0; i < Number(formData.marksheetCount); i++) {
     marksheetBoxes.push(
-      // key={i} is needed by React when we make many items in a loop
       <div className="field" key={i}>
         <label>College Marksheet {i + 1} *</label>
         <input type="file" accept=".jpg,.jpeg,.pdf" onChange={(e) => handleCollegeFile(e, i)} />
@@ -25,7 +22,7 @@ function Step2({ formData, errors, handleChange, handleFile, handleCollegeFile }
       </div>
       <div className="field">
         <label>Percentage *</label>
-        <input type="number" name="tenthPercentage" value={formData.tenthPercentage} onChange={handleChange} />
+        <input type="number" name="tenthPercentage" placeholder="80%" value={formData.tenthPercentage} onChange={handleChange} />
         <span className="error">{errors.tenthPercentage}</span>
       </div>
       <div className="field">
@@ -42,7 +39,7 @@ function Step2({ formData, errors, handleChange, handleFile, handleCollegeFile }
       </div>
       <div className="field">
         <label>Percentage *</label>
-        <input type="number" name="twelfthPercentage" value={formData.twelfthPercentage} onChange={handleChange} />
+        <input type="number" name="twelfthPercentage"  placeholder="80%" value={formData.twelfthPercentage} onChange={handleChange} />
         <span className="error">{errors.twelfthPercentage}</span>
       </div>
       <div className="field">
@@ -59,7 +56,7 @@ function Step2({ formData, errors, handleChange, handleFile, handleCollegeFile }
       </div>
       <div className="field">
         <label>CGPA *</label>
-        <input type="number" step="0.01" name="cgpa" value={formData.cgpa} onChange={handleChange} />
+        <input type="number" step="0.01" name="cgpa"  placeholder="8.1" value={formData.cgpa} onChange={handleChange} />
         <span className="error">{errors.cgpa}</span>
       </div>
 
@@ -77,7 +74,6 @@ function Step2({ formData, errors, handleChange, handleFile, handleCollegeFile }
         </select>
       </div>
 
-      {/* show the boxes we built with the loop above */}
       {marksheetBoxes}
     </div>
   );

@@ -5,25 +5,25 @@ function Step3({ formData, errors, handleChange, handleFile, handleCheckbox }) {
 
       <div className="field">
         <label>Bank Name *</label>
-        <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} />
+        <input type="text" name="bankName"  placeholder="State Bank Of India" value={formData.bankName} onChange={handleChange} />
         <span className="error">{errors.bankName}</span>
       </div>
 
       <div className="field">
         <label>Account Number *</label>
-        <input type="text" name="accountNo" value={formData.accountNo} onChange={handleChange} />
+        <input type="text" name="accountNo" placeholder="12345678900" value={formData.accountNo} onChange={handleChange} />
         <span className="error">{errors.accountNo}</span>
       </div>
 
       <div className="field">
         <label>IFSC Code *</label>
-        <input type="text" name="ifsc" maxLength="11" value={formData.ifsc} onChange={handleChange} />
+        <input type="text" name="ifsc" maxLength="11" placeholder="SBIN0001234" value={formData.ifsc} onChange={handleChange} />
         <span className="error">{errors.ifsc}</span>
       </div>
 
       <div className="field">
         <label>Branch *</label>
-        <input type="text" name="branch" value={formData.branch} onChange={handleChange} />
+        <input type="text" name="branch"placeholder="Chennai-Guindy" value={formData.branch} onChange={handleChange} />
         <span className="error">{errors.branch}</span>
       </div>
 
@@ -40,7 +40,6 @@ function Step3({ formData, errors, handleChange, handleFile, handleCheckbox }) {
       </div>
 
       <div className="field">
-        {/* a checkbox uses "checked" (true or false) instead of "value" */}
         <label>
           <input type="checkbox" checked={formData.agree} onChange={handleCheckbox} />
           I agree to join in TringApps

@@ -5,7 +5,7 @@ function Step1({ formData, errors, handleChange, handleFile }) {
 
       <div className="field">
         <label>Full Name *</label>
-        <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} />
+        <input type="text" name="fullName" placeholder="Name With Initial" value={formData.fullName} onChange={handleChange} />
         <span className="error">{errors.fullName}</span>
       </div>
 
@@ -28,32 +28,31 @@ function Step1({ formData, errors, handleChange, handleFile }) {
 
       <div className="field">
         <label>Email *</label>
-        <input type="text" name="email" value={formData.email} onChange={handleChange} />
+        <input type="text" name="email" placeholder="tring@gmail.com" value={formData.email} onChange={handleChange} />
         <span className="error">{errors.email}</span>
       </div>
 
       <div className="field">
         <label>Mobile Number *</label>
-        {/* maxLength=10 stops the user typing more than 10 digits */}
-        <input type="text" name="mobile" maxLength="10" value={formData.mobile} onChange={handleChange} />
+        <input type="text" name="mobile"placeholder="eg : 99******76" maxLength="10" value={formData.mobile} onChange={handleChange} />
         <span className="error">{errors.mobile}</span>
       </div>
 
       <div className="field">
         <label>Alternate Mobile Number *</label>
-        <input type="text" name="altMobile" maxLength="10" value={formData.altMobile} onChange={handleChange} />
+        <input type="text" name="altMobile" placeholder="eg : 99******76" maxLength="10" value={formData.altMobile} onChange={handleChange} />
         <span className="error">{errors.altMobile}</span>
       </div>
 
       <div className="field">
         <label>Father's Name *</label>
-        <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange} />
+        <input type="text" name="fatherName" placeholder="eg : RAM G" value={formData.fatherName} onChange={handleChange} />
         <span className="error">{errors.fatherName}</span>
       </div>
 
       <div className="field">
         <label>Mother's Name *</label>
-        <input type="text" name="motherName" value={formData.motherName} onChange={handleChange} />
+        <input type="text" name="motherName" placeholder="eg : MANU R" value={formData.motherName} onChange={handleChange} />
         <span className="error">{errors.motherName}</span>
       </div>
 
@@ -86,10 +85,9 @@ function Step1({ formData, errors, handleChange, handleFile }) {
 
       <h3>Uploads (JPG only)</h3>
 
-      
       <div className="field">
         <label>Photo *</label>
-        <input type="file" name="photo" accept=".jpg,.jpeg" onChange={handleFile} />
+        <input type="file" placeholder="YOUR PASSPORT_SIZED PHOTO" name="photo" accept=".jpg,.jpeg" onChange={handleFile} />
         <span className="error">{errors.photo}</span>
       </div>
 
