@@ -1,27 +1,27 @@
-name : Onboard registration
+name: OnBoard Registration
 
 on:
- push:
- branches:
- - main
-
+  push:
+    branches:
+      - main
 
 jobs:
-backend:
-runs-on: ubuntu-latest
+  backend:
+    runs-on: ubuntu-latest
 
-steps:
- - name: check
-   uses: actions/checkout@v4
- - name: setup node.js
-   uses : actions/setup-node@v4
-with:
-   node-version: 22
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
 
-- name : install dependencies
-  working-directory : backend
-  run : npm ci
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-- name : check backend
-  working-directory: backend
-  run : node --check server.js
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Check backend syntax
+        working-directory: backend
+        run: node --check server.js
