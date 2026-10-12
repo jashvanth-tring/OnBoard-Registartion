@@ -11,7 +11,7 @@ function Step3({ formData, errors, handleChange, handleFile, handleCheckbox }) {
 
       <div className="field">
         <label>Account Number *</label>
-        <input type="text" name="accountNo" placeholder="12345678900" value={formData.accountNo} onChange={handleChange} />
+        <input type="text" name="accountNo" maxLength="11" placeholder="Enter Your 11 digit number" value={formData.accountNo} onChange={handleChange} />
         <span className="error">{errors.accountNo}</span>
       </div>
 
