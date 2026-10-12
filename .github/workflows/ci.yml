@@ -27,3 +27,9 @@ jobs:
       - name: Check backend syntax
         working-directory: backend
         run: node --check server.js
+      - name: start the server
+        working-directory: backend
+        run: npm start
+      - name: start the frontend
+        working-directory: fronend
+        run: npm run dev
