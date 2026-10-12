@@ -5,14 +5,13 @@ push:
 branches:
 - main
 
-job:
+jobs:
 backend:
 runs-on: ubuntu-latest
 
 steps:
 - name: check
 uses: actions/checkout@v4
-
 - name: setup node.js
 uses : actions/setup-node@v4
 with:
