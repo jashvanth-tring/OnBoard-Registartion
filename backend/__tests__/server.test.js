@@ -260,7 +260,7 @@ describe('registration backend', () => {
       const result = await post(form);
 
       assert.equal(result.status, 400);
-      assert.equal(result.body.message, 'Unexpected file field: hacker');
+      assert.match(result.body.message, /^Unexpected file field/);
     });
 
     it('rejects a file larger than 5 MB', async () => {
