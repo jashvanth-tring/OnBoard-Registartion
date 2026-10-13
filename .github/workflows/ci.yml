@@ -23,20 +23,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
       - name: Install backend dependencies
         working-directory: backend
         run: npm ci
-      - name: INstall npm
-        working-directory: backend
-        run: npm install
+
       - name: Check backend syntax
         working-directory: backend
         run: node --check server.js
 
+      - name: Run backend tests
+        working-directory: backend
+        run: npm test
+
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
+
+      - name: Run frontend tests and generate coverage
+        working-directory: frontend
+        run: npm run test:coverage
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
@@ -47,9 +57,5 @@ jobs:
             -Dsonar.projectKey=jashvanth-tring_OnBoard-Registartion
             -Dsonar.organization=jashvanth-tring
             -Dsonar.sources=frontend/src,backend
-
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/uploads/**
-
-
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/uploads/**
-
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/uploads/**,**/coverage/**
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
