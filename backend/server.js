@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('node:fs');
@@ -19,10 +20,14 @@ app.use(cors({
 
 function removeFolder(req) {
   if (req.folderName) {
-    fs.rmSync(path.join(uploadDirectory, req.folderName), {
-      recursive: true,
-      force: true
-    });
+    const folderPath = path.join(uploadDirectory, req.folderName);
+
+    if (path.dirname(folderPath) === uploadDirectory) {
+      fs.rmSync(folderPath, {
+        recursive: true,
+        force: true
+      });
+    }
   }
 }
 
@@ -38,14 +43,59 @@ function isEmpty(value) {
 }
 
 function isValidRange(value, min, max) {
-  if (isEmpty(value)) return false;
+  if (isEmpty(value)) {
+    return false;
+  }
 
   const number = Number(value);
 
   return Number.isFinite(number) &&
-    !Number.isNaN(number) &&
     number >= min &&
     number <= max;
+}
+
+function isDigits(value, minLength, maxLength = minLength) {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  if (value.length < minLength || value.length > maxLength) {
+    return false;
+  }
+
+  for (const character of value) {
+    if (character < '0' || character > '9') {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isValidEmail(value) {
+  if (typeof value !== 'string' || value.length > 254) {
+    return false;
+  }
+
+  const atIndex = value.indexOf('@');
+
+  if (
+    atIndex <= 0 ||
+    atIndex !== value.lastIndexOf('@') ||
+    atIndex === value.length - 1
+  ) {
+    return false;
+  }
+
+  const localPart = value.slice(0, atIndex);
+  const domain = value.slice(atIndex + 1);
+  const dotIndex = domain.lastIndexOf('.');
+
+  return localPart.length <= 64 &&
+    !/\s/.test(localPart) &&
+    !/\s/.test(domain) &&
+    dotIndex > 0 &&
+    dotIndex < domain.length - 1;
 }
 
 function validateRequired(body) {
@@ -67,11 +117,11 @@ function validateRequired(body) {
 }
 
 function validatePersonal(body) {
-  if (!/^\d{10}$/.test(body.mobile)) {
+  if (!isDigits(body.mobile, 10)) {
     return 'Mobile must be 10 digits';
   }
 
-  if (!/^\d{10}$/.test(body.altMobile)) {
+  if (!isDigits(body.altMobile, 10)) {
     return 'Alternate mobile must be 10 digits';
   }
 
@@ -79,11 +129,23 @@ function validatePersonal(body) {
     return 'Mobile and alternate mobile must not be the same';
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+  if (!isValidEmail(body.email)) {
     return 'Enter a valid email';
   }
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(body.dob)) {
+  if (
+    typeof body.dob !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(body.dob)
+  ) {
+    return 'Enter a valid date of birth';
+  }
+
+  const date = new Date(body.dob);
+
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== body.dob
+  ) {
     return 'Enter a valid date of birth';
   }
 
@@ -115,7 +177,9 @@ function validateEducation(body) {
     return 'CGPA must be 0 to 10';
   }
 
-  if (!/^[1-8]$/.test(String(body.marksheetCount))) {
+  if (!isDigits(String(body.marksheetCount), 1) ||
+      Number(body.marksheetCount) < 1 ||
+      Number(body.marksheetCount) > 8) {
     return 'Marksheet count must be 1 to 8';
   }
 
@@ -123,16 +187,17 @@ function validateEducation(body) {
 }
 
 function validateBank(body) {
-  if (!/^\d{9,18}$/.test(body.accountNo)) {
+  if (!isDigits(body.accountNo, 9, 18)) {
     return 'Account number must be 9 to 18 digits';
   }
 
-  if (!/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(body.ifsc)) {
-    return 'Enter a valid IFSC code';
-  }
+  const ifsc = typeof body.ifsc === 'string' ? body.ifsc : '';
 
-  if (body.ifsc.length !== 11) {
-    return 'IFSC must be 11 characters';
+  if (
+    ifsc.length !== 11 ||
+    !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifsc)
+  ) {
+    return 'Enter a valid 11-character IFSC code';
   }
 
   if (body.agree !== 'true') {
@@ -150,7 +215,7 @@ function validateFiles(body, files) {
   ];
 
   for (const name of requiredFiles) {
-    if (!files[name] || !files[name][0]) {
+    if (!files[name]?.[0]) {
       return name + ' file is required';
     }
   }
@@ -174,7 +239,7 @@ function validateRegistration(body, files) {
 }
 
 function getFile(files, name) {
-  return files[name] ? files[name][0].filename : null;
+  return files[name]?.[0]?.filename || null;
 }
 
 function buildRecord(body, files, folderName) {
@@ -226,7 +291,7 @@ app.get('/test-db', (req, res) => {
       return res.status(500).send('Database not connected');
     }
 
-    res.send('connected');
+    return res.send('connected');
   });
 });
 
@@ -240,7 +305,7 @@ app.post('/register', (req, res) => {
       return fail(req, res, 400, message);
     }
 
-    const body = req.body;
+    const body = req.body || {};
     const files = req.files || {};
     const validationError = validateRegistration(body, files);
 
