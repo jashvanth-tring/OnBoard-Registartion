@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import './App.css';
 import Step1 from './Step1';
@@ -58,10 +59,20 @@ function isDigits(value, minLength, maxLength = minLength) {
     return false;
   }
 
-  return [...value].every(char => char >= '0' && char <= '9');
+  for (const char of value) {
+    if (char < '0' || char > '9') {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function isValidEmail(value) {
+  if (typeof value !== 'string' || value.length > 254) {
+    return false;
+  }
+
   const email = value.trim();
   const atIndex = email.indexOf('@');
 
@@ -79,7 +90,7 @@ function isValidEmail(value) {
   const dotIndex = domain.lastIndexOf('.');
 
   return (
-    localPart.length > 0 &&
+    localPart.length <= 64 &&
     !localPart.startsWith('.') &&
     !localPart.endsWith('.') &&
     domain.length > 0 &&
@@ -134,11 +145,7 @@ function validateStep1(data) {
     errors.altMobile = 'Enter 10 digit alternate number';
   }
 
-  if (
-    !errors.mobile &&
-    !errors.altMobile &&
-    data.mobile === data.altMobile
-  ) {
+  if (!errors.mobile && !errors.altMobile && data.mobile === data.altMobile) {
     errors.altMobile = 'Alternate number must be different';
   }
 
@@ -152,7 +159,7 @@ function validateStep1(data) {
   return errors;
 }
 
-function validateSchoolDetails(data, errors, prefix, schoolField, percentageField, marksheetField) {
+function validateSchoolDetails(data, errors, schoolField, percentageField, marksheetField) {
   addRequiredError(errors, data, schoolField, 'School name is required');
 
   if (!isValidRange(data[percentageField], 0, 100)) {
@@ -186,7 +193,6 @@ function validateStep2(data) {
   validateSchoolDetails(
     data,
     errors,
-    'tenth',
     'tenthSchool',
     'tenthPercentage',
     'tenthMarksheet'
@@ -195,7 +201,6 @@ function validateStep2(data) {
   validateSchoolDetails(
     data,
     errors,
-    'twelfth',
     'twelfthSchool',
     'twelfthPercentage',
     'twelfthMarksheet'
@@ -215,7 +220,12 @@ function validateStep3(data) {
     errors.accountNo = 'Enter account number with 9 to 18 digits';
   }
 
-  if (!/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(data.ifsc)) {
+  const ifsc = typeof data.ifsc === 'string' ? data.ifsc : '';
+
+  if (
+    ifsc.length !== 11 ||
+    !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifsc)
+  ) {
     errors.ifsc = 'Enter a valid IFSC code';
   }
 
@@ -243,7 +253,52 @@ function validateCurrentStep(step, data) {
     3: validateStep3
   };
 
-  return validators[step](data);
+  return validators[step]?.(data) || {};
+}
+
+function createFormData(formData) {
+  const data = new FormData();
+
+  for (const [key, value] of Object.entries(formData)) {
+    if (key === 'collegeMarksheets') {
+      appendCollegeMarksheets(data, formData);
+      continue;
+    }
+
+    data.append(key, key === 'agree' ? String(value) : value ?? '');
+  }
+
+  return data;
+}
+
+function appendCollegeMarksheets(data, formData) {
+  const count = Number(formData.marksheetCount);
+
+  for (let index = 0; index < count; index += 1) {
+    const file = formData.collegeMarksheets[index];
+
+    if (file) {
+      data.append('collegeMarksheets', file);
+    }
+  }
+}
+
+async function sendRegistration(formData) {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/register`,
+    {
+      method: 'POST',
+      body: createFormData(formData)
+    }
+  );
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Registration failed');
+  }
+
+  return result;
 }
 
 function App() {
@@ -307,53 +362,16 @@ function App() {
     setSubmitting(true);
 
     try {
-      const data = new FormData();
-
-      for (const [key, value] of Object.entries(formData)) {
-        if (key === 'collegeMarksheets') {
-          const count = Number(formData.marksheetCount);
-
-          for (let index = 0; index < count; index += 1) {
-            const file = formData.collegeMarksheets[index];
-
-            if (file) {
-              data.append('collegeMarksheets', file);
-            }
-          }
-
-          continue;
-        }
-
-        if (key === 'agree') {
-          data.append(key, String(value));
-          continue;
-        }
-
-        if (value !== null && value !== undefined) {
-          data.append(key, value);
-        }
-      }
-
-      const response = await fetch('http://localhost:5000/register', {
-        method: 'POST',
-        body: data
-      });
-
-      const result = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        alert(result.message || 'Registration failed');
-        return;
-      }
+      const result = await sendRegistration(formData);
 
       alert(result.message || 'Registration successful!');
 
-      setFormData(initialFormData);
+      setFormData({ ...initialFormData, collegeMarksheets: [] });
       setErrors({});
       setStep(1);
     } catch (error) {
       console.error('Registration request failed:', error);
-      alert('Cannot connect to the server. Please try again.');
+      alert(error.message || 'Cannot connect to the server. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -383,13 +401,11 @@ function App() {
     setStep(current => Math.max(1, current - 1));
   }
 
-  let submitButtonText = 'Submit';
-
-  if (submitting) {
-    submitButtonText = 'Submitting...';
-  } else if (step < 3) {
-    submitButtonText = 'Save & Continue';
-  }
+  const submitButtonText = submitting
+    ? 'Submitting...'
+    : step < 3
+      ? 'Save & Continue'
+      : 'Submit';
 
   return (
     <div className="container">
