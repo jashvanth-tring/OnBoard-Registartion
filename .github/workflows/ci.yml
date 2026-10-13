@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   backend:
@@ -12,13 +16,15 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         working-directory: backend
         run: npm ci
       - name: INstall npm
@@ -27,4 +33,20 @@ jobs:
       - name: Check backend syntax
         working-directory: backend
         run: node --check server.js
-      
+
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_KEY }}
+        with:
+          args: >
+            -Dsonar.projectKey=jashvanth-tring_OnBoard-Registartion
+            -Dsonar.organization=jashvanth-tring
+            -Dsonar.sources=frontend/src,backend
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/uploads/**
+
