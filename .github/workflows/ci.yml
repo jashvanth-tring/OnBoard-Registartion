@@ -36,9 +36,9 @@ jobs:
         working-directory: backend
         run: node --check server.js
 
-      - name: Run backend tests
+      - name: Run backend tests and generate coverage
         working-directory: backend
-        run: npm test
+        run: npm run test:coverage
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -57,5 +57,8 @@ jobs:
             -Dsonar.projectKey=jashvanth-tring_OnBoard-Registartion
             -Dsonar.organization=jashvanth-tring
             -Dsonar.sources=frontend/src,backend
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/uploads/**,**/coverage/**
-            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+            -Dsonar.tests=frontend/src,backend
+            -Dsonar.test.inclusions=**/__tests__/**
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/uploads/**,**/coverage/**,**/lcov.info
+            -Dsonar.coverage.exclusions=backend/db.js,frontend/src/main.jsx
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info,backend/lcov.info

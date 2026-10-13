@@ -333,6 +333,10 @@ app.post('/register', (req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log('Node server running on port ' + port);
-});
+module.exports = app;
+
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log('Node server running on port ' + port);
+  });
+}
