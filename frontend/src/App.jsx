@@ -49,22 +49,88 @@ function isValidRange(value, min, max) {
   return Number.isFinite(number) && number >= min && number <= max;
 }
 
+function isDigits(value, minLength, maxLength = minLength) {
+  if (
+    typeof value !== 'string' ||
+    value.length < minLength ||
+    value.length > maxLength
+  ) {
+    return false;
+  }
+
+  return [...value].every(char => char >= '0' && char <= '9');
+}
+
+function isValidEmail(value) {
+  const email = value.trim();
+  const atIndex = email.indexOf('@');
+
+  if (
+    atIndex <= 0 ||
+    atIndex !== email.lastIndexOf('@') ||
+    email.includes(' ') ||
+    email.includes('..')
+  ) {
+    return false;
+  }
+
+  const localPart = email.slice(0, atIndex);
+  const domain = email.slice(atIndex + 1);
+  const dotIndex = domain.lastIndexOf('.');
+
+  return (
+    localPart.length > 0 &&
+    !localPart.startsWith('.') &&
+    !localPart.endsWith('.') &&
+    domain.length > 0 &&
+    dotIndex > 0 &&
+    dotIndex < domain.length - 2 &&
+    !domain.startsWith('.') &&
+    !domain.endsWith('.') &&
+    !domain.includes('..')
+  );
+}
+
+function addRequiredError(errors, data, field, message) {
+  if (!String(data[field] ?? '').trim()) {
+    errors[field] = message;
+  }
+}
+
+function validateJpegFields(data, errors) {
+  const requiredFiles = ['photo', 'signature', 'aadhar', 'pan'];
+
+  for (const name of requiredFiles) {
+    const file = data[name];
+
+    if (!file) {
+      errors[name] = `${name} is required`;
+    } else if (file.type !== 'image/jpeg') {
+      errors[name] = 'Only JPG allowed';
+    }
+  }
+
+  if (data.passport && data.passport.type !== 'image/jpeg') {
+    errors.passport = 'Only JPG allowed';
+  }
+}
+
 function validateStep1(data) {
   const errors = {};
 
-  if (!data.fullName.trim()) errors.fullName = 'Name is required';
-  if (!data.dob) errors.dob = 'Date of birth is required';
-  if (!data.gender) errors.gender = 'Select gender';
+  addRequiredError(errors, data, 'fullName', 'Name is required');
+  addRequiredError(errors, data, 'dob', 'Date of birth is required');
+  addRequiredError(errors, data, 'gender', 'Select gender');
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+  if (!isValidEmail(data.email)) {
     errors.email = 'Enter a valid email';
   }
 
-  if (!/^\d{10}$/.test(data.mobile)) {
+  if (!isDigits(data.mobile, 10)) {
     errors.mobile = 'Enter 10 digit mobile number';
   }
 
-  if (!/^\d{10}$/.test(data.altMobile)) {
+  if (!isDigits(data.altMobile, 10)) {
     errors.altMobile = 'Enter 10 digit alternate number';
   }
 
@@ -76,66 +142,66 @@ function validateStep1(data) {
     errors.altMobile = 'Alternate number must be different';
   }
 
-  if (!data.fatherName.trim()) errors.fatherName = 'Father name is required';
-  if (!data.motherName.trim()) errors.motherName = 'Mother name is required';
-  if (!data.maritalStatus) errors.maritalStatus = 'Select marital status';
-  if (!data.bloodGroup) errors.bloodGroup = 'Select blood group';
+  addRequiredError(errors, data, 'fatherName', 'Father name is required');
+  addRequiredError(errors, data, 'motherName', 'Mother name is required');
+  addRequiredError(errors, data, 'maritalStatus', 'Select marital status');
+  addRequiredError(errors, data, 'bloodGroup', 'Select blood group');
 
-  for (const name of ['photo', 'signature', 'aadhar', 'pan']) {
-    if (!data[name]) {
-      errors[name] = name + ' is required';
-    } else if (data[name].type !== 'image/jpeg') {
-      errors[name] = 'Only JPG allowed';
-    }
-  }
-
-  if (data.passport && data.passport.type !== 'image/jpeg') {
-    errors.passport = 'Only JPG allowed';
-  }
+  validateJpegFields(data, errors);
 
   return errors;
 }
 
-function validateStep2(data) {
-  const errors = {};
+function validateSchoolDetails(data, errors, prefix, schoolField, percentageField, marksheetField) {
+  addRequiredError(errors, data, schoolField, 'School name is required');
 
-  if (!data.tenthSchool.trim()) {
-    errors.tenthSchool = 'School name is required';
+  if (!isValidRange(data[percentageField], 0, 100)) {
+    errors[percentageField] = 'Enter percentage between 0 and 100';
   }
 
-  if (!isValidRange(data.tenthPercentage, 0, 100)) {
-    errors.tenthPercentage = 'Enter percentage between 0 and 100';
+  if (!data[marksheetField]) {
+    errors[marksheetField] = 'Marksheet is required';
   }
+}
 
-  if (!data.tenthMarksheet) {
-    errors.tenthMarksheet = 'Marksheet is required';
-  }
-
-  if (!data.twelfthSchool.trim()) {
-    errors.twelfthSchool = 'School name is required';
-  }
-
-  if (!isValidRange(data.twelfthPercentage, 0, 100)) {
-    errors.twelfthPercentage = 'Enter percentage between 0 and 100';
-  }
-
-  if (!data.twelfthMarksheet) {
-    errors.twelfthMarksheet = 'Marksheet is required';
-  }
-
-  if (!data.collegeName.trim()) {
-    errors.collegeName = 'College name is required';
-  }
+function validateCollegeDetails(data, errors) {
+  addRequiredError(errors, data, 'collegeName', 'College name is required');
 
   if (!isValidRange(data.cgpa, 0, 10)) {
     errors.cgpa = 'Enter CGPA between 0 and 10';
   }
 
-  for (let i = 0; i < Number(data.marksheetCount); i++) {
-    if (!data.collegeMarksheets[i]) {
-      errors['college' + i] = 'Marksheet ' + (i + 1) + ' is required';
+  const count = Number(data.marksheetCount);
+
+  for (let index = 0; index < count; index += 1) {
+    if (!data.collegeMarksheets[index]) {
+      errors[`college${index}`] = `Marksheet ${index + 1} is required`;
     }
   }
+}
+
+function validateStep2(data) {
+  const errors = {};
+
+  validateSchoolDetails(
+    data,
+    errors,
+    'tenth',
+    'tenthSchool',
+    'tenthPercentage',
+    'tenthMarksheet'
+  );
+
+  validateSchoolDetails(
+    data,
+    errors,
+    'twelfth',
+    'twelfthSchool',
+    'twelfthPercentage',
+    'twelfthMarksheet'
+  );
+
+  validateCollegeDetails(data, errors);
 
   return errors;
 }
@@ -143,9 +209,9 @@ function validateStep2(data) {
 function validateStep3(data) {
   const errors = {};
 
-  if (!data.bankName.trim()) errors.bankName = 'Bank name is required';
+  addRequiredError(errors, data, 'bankName', 'Bank name is required');
 
-  if (!/^\d{9,18}$/.test(data.accountNo)) {
+  if (!isDigits(data.accountNo, 9, 18)) {
     errors.accountNo = 'Enter account number with 9 to 18 digits';
   }
 
@@ -153,13 +219,31 @@ function validateStep3(data) {
     errors.ifsc = 'Enter a valid IFSC code';
   }
 
-  if (!data.branch.trim()) errors.branch = 'Branch is required';
-  if (!data.passbook) errors.passbook = 'Passbook is required';
-  if (!data.offerLetter) errors.offerLetter = 'Offer letter is required';
+  addRequiredError(errors, data, 'branch', 'Branch is required');
 
-  if (!data.agree) errors.agree = 'You must tick the checkbox';
+  if (!data.passbook) {
+    errors.passbook = 'Passbook is required';
+  }
+
+  if (!data.offerLetter) {
+    errors.offerLetter = 'Offer letter is required';
+  }
+
+  if (!data.agree) {
+    errors.agree = 'You must tick the checkbox';
+  }
 
   return errors;
+}
+
+function validateCurrentStep(step, data) {
+  const validators = {
+    1: validateStep1,
+    2: validateStep2,
+    3: validateStep3
+  };
+
+  return validators[step](data);
 }
 
 function App() {
@@ -168,95 +252,92 @@ function App() {
   const [formData, setFormData] = useState(initialFormData);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleChange(e) {
-    const { name, value } = e.target;
+  function handleChange(event) {
+    const { name, value } = event.target;
 
     setFormData(previous => ({
       ...previous,
       [name]: value,
-      ...(name === 'marksheetCount' ? {
-        collegeMarksheets: previous.collegeMarksheets.slice(0, Number(value))
-      } : {})
+      ...(name === 'marksheetCount'
+        ? {
+            collegeMarksheets: previous.collegeMarksheets.slice(
+              0,
+              Number(value)
+            )
+          }
+        : {})
     }));
   }
 
-  function handleFile(e) {
-    const { name, files } = e.target;
+  function handleFile(event) {
+    const { name, files } = event.target;
 
     setFormData(previous => ({
       ...previous,
-      [name]: files[0] || null
+      [name]: files?.[0] || null
     }));
   }
 
-  function handleCheckbox(e) {
+  function handleCheckbox(event) {
     setFormData(previous => ({
       ...previous,
-      agree: e.target.checked
+      agree: event.target.checked
     }));
   }
 
-  function handleCollegeFile(e, index) {
-    const file = e.target.files[0];
+  function handleCollegeFile(event, index) {
+    const file = event.target.files?.[0] || null;
 
     setFormData(previous => {
-      const list = [...previous.collegeMarksheets];
-      list[index] = file || null;
+      const collegeMarksheets = [...previous.collegeMarksheets];
+      collegeMarksheets[index] = file;
 
       return {
         ...previous,
-        collegeMarksheets: list
+        collegeMarksheets
       };
     });
   }
 
-  function handleNext(e) {
-    e.preventDefault();
-
-    let newErrors = {};
-
-    if (step === 1) newErrors = validateStep1(formData);
-    else if (step === 2) newErrors = validateStep2(formData);
-    else newErrors = validateStep3(formData);
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) return;
-
-    if (step < 3) {
-      setStep(current => current + 1);
+  async function submitForm() {
+    if (submitting) {
       return;
     }
 
-    void submitForm();
-  }
-
-  async function submitForm() {
-    if (submitting) return;
-
     setSubmitting(true);
 
-    const data = new FormData();
+    try {
+      const data = new FormData();
 
-    for (const [key, value] of Object.entries(formData)) {
-      if (key === 'collegeMarksheets') {
-        for (let i = 0; i < Number(formData.marksheetCount); i++) {
-          const file = formData.collegeMarksheets[i];
+      for (const [key, value] of Object.entries(formData)) {
+        if (key === 'collegeMarksheets') {
+          const count = Number(formData.marksheetCount);
 
-          if (file) data.append('collegeMarksheets', file);
+          for (let index = 0; index < count; index += 1) {
+            const file = formData.collegeMarksheets[index];
+
+            if (file) {
+              data.append('collegeMarksheets', file);
+            }
+          }
+
+          continue;
         }
-      } else if (key === 'agree') {
-        data.append(key, String(value));
-      } else if (value !== null && value !== undefined) {
-        data.append(key, value);
-      }
-    }
 
-      try {
-        const response = await fetch('http://localhost:5000/register', {
-          method: 'POST',
-          body: data
-        });
+        if (key === 'agree') {
+          data.append(key, String(value));
+          continue;
+        }
+
+        if (value !== null && value !== undefined) {
+          data.append(key, value);
+        }
+      }
+
+      const response = await fetch('http://localhost:5000/register', {
+        method: 'POST',
+        body: data
+      });
 
       const result = await response.json().catch(() => ({}));
 
@@ -270,12 +351,44 @@ function App() {
       setFormData(initialFormData);
       setErrors({});
       setStep(1);
-    } catch {
-      console.error('Registration request failed');
+    } catch (error) {
+      console.error('Registration request failed:', error);
       alert('Cannot connect to the server. Please try again.');
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleNext(event) {
+    event.preventDefault();
+
+    const newErrors = validateCurrentStep(step, formData);
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
+    if (step < 3) {
+      setStep(current => current + 1);
+      return;
+    }
+
+    await submitForm();
+  }
+
+  function handleBack() {
+    setErrors({});
+    setStep(current => Math.max(1, current - 1));
+  }
+
+  let submitButtonText = 'Submit';
+
+  if (submitting) {
+    submitButtonText = 'Submitting...';
+  } else if (step < 3) {
+    submitButtonText = 'Save & Continue';
   }
 
   return (
@@ -284,9 +397,17 @@ function App() {
       <h2 className="on">OnBoard Registration</h2>
 
       <div className="progress">
-        <span className={step === 1 ? 'active' : ''}>1. Personal Details</span>
-        <span className={step === 2 ? 'active' : ''}>2. Education Details</span>
-        <span className={step === 3 ? 'active' : ''}>3. Bank Details</span>
+        <span className={step === 1 ? 'active' : ''}>
+          1. Personal Details
+        </span>
+
+        <span className={step === 2 ? 'active' : ''}>
+          2. Education Details
+        </span>
+
+        <span className={step === 3 ? 'active' : ''}>
+          3. Bank Details
+        </span>
       </div>
 
       <form onSubmit={handleNext} noValidate>
@@ -321,19 +442,13 @@ function App() {
 
         <div className="buttons">
           {step > 1 && (
-            <button
-              type="button"
-              onClick={() => {
-                setErrors({});
-                setStep(current => current - 1);
-              }}
-            >
+            <button type="button" onClick={handleBack}>
               Back
             </button>
           )}
 
           <button type="submit" disabled={submitting}>
-            {submitting ? 'Submitting...' : step < 3 ? 'Save & Continue' : 'Submit'}
+            {submitButtonText}
           </button>
         </div>
       </form>
