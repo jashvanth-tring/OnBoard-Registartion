@@ -1,103 +1,352 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #fefefe;
-  margin: 0;
+
+* {
+  box-sizing: border-box;
 }
 
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #e8f0ff, #fefefe, #e8fff0);
+  background-size: 300% 300%;
+  animation: backgroundMove 12s ease infinite;
+  margin: 0;
+  cursor: default;
+}
+
+@keyframes backgroundMove {
+  0% {
+    background-position:0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Main Container */
 .container {
   max-width: 700px;
   margin: 30px auto;
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   padding: 25px 30px;
   border-radius: 20px;
-  box-shadow: 0 30px 50px rgba(31, 30, 30, 0.1);
+  box-shadow: 0 15px 40px rgba(31, 30, 30, 0.12);
+  animation: containerAppear 0.8s ease-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container:hover {
+  box-shadow: 0 20px 50px rgba(26, 86, 219, 0.18);
+}
+
+@keyframes containerAppear {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 h1 {
   text-align: center;
   font-size: 59px;
   color: #0dc92dfe;
- text-shadow: 5px 5px 10px #00ff44;
+  text-shadow: 5px 5px 10px #00ff44;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  animation: headingAppear 1s ease-out;
+  cursor: default;
 }
 
- h2{
-   font-size:30px;
+@keyframes headingAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 100;
+    transform: scale(1);
+  }
+}
+
+/* Section Heading */
+h2 {
+  font-size: 30px;
   font-family: 'Times New Roman', Times, serif;
- }
-.on{
+  transition: color 0.3s ease;
+}
+
+h2:hover {
+  color: #1a56db;
+}
+
+/* OnBoard Registration Heading */
+.on {
   text-align: center;
   font-size: 40px;
-  font-family:'Times New Roman', Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   transform: translateY(-20px);
-
-
+  animation: slideIn 0.8s ease-out;
 }
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-20px);
+  }
+}
+
+/* Progress Steps */
 .progress {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 25px;
   font-size: 20px;
   color: #888;
-  
+}
+
+.progress > * {
+  transition: color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.progress > *:hover {
+  color: #1a56db;
+  transform: translateY(-3px);
 }
 
 .progress .active {
   color: #1b01be;
   font-weight: bold;
-  text-shadow: 0px 5px 20px #1a56db;
+  text-shadow: 0 5px 20px #1a56db;
 }
 
+/* Form Fields */
 .field {
   display: flex;
   flex-direction: column;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
   font-family: 'Gill Sans', sans-serif;
   font-size: 16px;
+  animation: fieldAppear 0.5s ease-out both;
 }
 
+@keyframes fieldAppear {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
 
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Field Labels */
 .field label {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-size: 20px;
   font-family: 'Times New Roman', Times, serif;
   color: #111;
-  font-weight: auto;
-
+  font-weight: normal;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
+.field:focus-within label {
+  color: #1a56db;
+}
+
+/* Input Fields and Dropdowns */
 .field input,
 .field select {
-  padding: 8px;
+  width: 100%;
+  padding: 11px;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 20px;
+  border-radius: 8px;
+  font-size: 18px;
+  background: #fff;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease,
+    background-color 0.3s ease;
+  cursor: text;
 }
 
+/* Input Focus Animation */
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: #1a56db;
+  box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.12);
+  background-color: #fbfdff;
+  transform: translateY(-2px);
+}
+
+/* Dropdown Cursor */
+.field select {
+  cursor: pointer;
+}
+
+/* File Upload Cursor */
+.field input[type="file"] {
+  cursor: pointer;
+  background: #f8faff;
+}
+
+.field input[type="file"]::file-selector-button {
+  padding: 7px 12px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #1a56db;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.field input[type="file"]::file-selector-button:hover {
+  background: #123ca0;
+}
+
+/* Error Messages */
 .error {
-  color: red;
-  font-size: 12px;
+  color: #e11d48;
+  font-size: 13px;
   min-height: 14px;
-  margin-top: 2px;
+  margin-top: 4px;
+  animation: errorAppear 0.3s ease-out;
 }
 
+@keyframes errorAppear {
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Buttons */
 .buttons {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  gap: 15px;
+  margin-top: 25px;
 }
 
 .buttons button {
-  padding: 10px;
+  padding: 12px 22px;
   border: none;
   border-radius: 10px;
-  background: #1a56db;
+  background: linear-gradient(135deg, #1a56db, #4934d4);
   color: white;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: bold;
   cursor: pointer;
-  
+  box-shadow: 0 5px 15px rgba(26, 86, 219, 0.2);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.3s ease;
 }
 
+/* Button Hover Animation */
+.buttons button:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 9px 22px rgba(26, 86, 219, 0.35);
+}
+
+/* Button Click Animation */
+.buttons button:active {
+  transform: scale(0.96);
+}
+
+/* Back Button */
 .buttons button[type="button"] {
-  background: #666;
+  background: linear-gradient(135deg, #666, #444);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.buttons button[type="button"]:hover {
+  background: linear-gradient(135deg, #555, #333);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Keyboard Accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(26, 86, 219, 0.45);
+  outline-offset: 3px;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 600px) {
+  .container {
+    width: calc(100% - 24px);
+    margin: 15px auto;
+    padding: 20px 16px;
+  }
+
+  h1 {
+    font-size: 42px;
+  }
+
+  h2 {
+    font-size: 25px;
+  }
+
+  .on {
+    font-size: 30px;
+  }
+
+  .progress {
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  .field label {
+    font-size: 18px;
+  }
+
+  .field input,
+  .field select {
+    font-size: 16px;
+  }
+
+  .buttons button {
+    padding: 11px 15px;
+    font-size: 14px;
+  }
+}
+
+/* Respect Reduced Motion Settings */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
